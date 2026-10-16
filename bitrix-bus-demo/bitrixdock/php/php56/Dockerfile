@@ -1,0 +1,19 @@
+FROM bitrixdock/php56-fpm:latest
+
+LABEL org.opencontainers.image.source="https://github.com/bitrixdock/bitrixdock"
+
+COPY ./php.ini /etc/php5/fpm/conf.d/90-php.ini
+COPY ./php.ini /etc/php5/cli/conf.d/90-php.ini
+COPY ./zz-custom.conf /etc/php5/fpm/pool.d/zz-custom.conf
+
+RUN usermod -u 1000 www-data
+
+RUN echo "www-data" > /etc/cron.deny && chmod 644 /etc/cron.deny
+
+WORKDIR "/var/www/bitrix"
+
+# php-fpm готов, когда принимает соединения на порту 9000
+HEALTHCHECK --interval=30s --timeout=10s --retries=10 --start-period=10s \
+    CMD php -r 'exit(@fsockopen("127.0.0.1", 9000) ? 0 : 1);'
+
+EXPOSE 9000

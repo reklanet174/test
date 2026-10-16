@@ -1,0 +1,35 @@
+# Битрикс БУС + модуль local.notes + React UI + Swagger
+# Запуск: .\start.ps1
+#
+# БУС/API:  http://localhost
+# React UI: http://localhost:8081
+# Swagger:  http://localhost:8081/docs
+
+name: bitrix-notes
+
+include:
+  - path: ../bitrix-bus-demo/bitrixdock/docker-compose.yml
+    env_file: ../bitrix-bus-demo/bitrixdock/.env
+
+services:
+  php:
+    volumes:
+      - ./module/local.notes:/var/www/bitrix/local/modules/local.notes
+
+  web_server:
+    volumes:
+      - ./module/local.notes:/var/www/bitrix/local/modules/local.notes
+
+  ui:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: bitrix-notes-ui
+    ports:
+      - "8081:80"
+    depends_on:
+      - web_server
+    networks:
+      - bitrixdock
+      - default
+    restart: unless-stopped

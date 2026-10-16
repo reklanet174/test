@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Notes API
+  description: Модуль local.notes для Битрикс БУС
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      summary: Health
+      responses:
+        '200':
+          description: OK
+  /api/notes:
+    get:
+      summary: Список
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Создать
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+      responses:
+        '201':
+          description: Created
+        '422':
+          description: Validation
+  /api/notes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Одна заметка
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+    put:
+      summary: Обновить
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+      responses:
+        '200':
+          description: OK
+        '422':
+          description: Validation
+    delete:
+      summary: Удалить
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    NoteInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string

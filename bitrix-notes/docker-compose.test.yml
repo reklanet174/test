@@ -1,0 +1,6 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: docker/phpunit.Dockerfile
+    container_name: bitrix-notes-test

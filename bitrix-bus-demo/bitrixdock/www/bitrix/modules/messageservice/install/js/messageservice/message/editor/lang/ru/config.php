@@ -1,0 +1,33 @@
+<?php
+
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_COUNTER'] = 'Знаков [color]#COUNT#[/color]/#MAX#';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_ADD_FILE'] = 'Файл';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_ADD_FILE_UPLOAD'] = 'Выбрать на компьютере';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_ADD_FILE_DISK'] = 'Найти в Битрикс24';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_PLACEHOLDER'] = 'Напишите сообщение';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_BUTTON_ADD'] = 'Добавить';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_PREVIEW'] = 'Что увидит клиент';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_PLACEHOLDER_FILLED_LATER_HINT'] = 'Некоторые данные заполнятся автоматически после отправки сообщения';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_NO_RECEIVER'] = 'Добавьте телефон клиента';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_NO_TEMPLATE_TITLE'] = 'Здесь будет шаблон сообщения';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_NO_TEMPLATE_BODY'] = 'Зарегистрируйте свой шаблон в личном кабинете вашего канала связи, чтобы отправлять клиенту сообщения';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_SUGGEST_TEMPLATE'] = 'Предложить шаблон';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_TEMPLATES'] = 'Шаблоны';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_FROM'] = 'Отправим сообщение с номера #FROM#';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_BUTTON_SEND'] = 'Отправить';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_BUTTON_CANCEL'] = 'Отмена';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_BUTTON_NO_CHANNELS'] = 'Подключить отправку сообщений';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_GENERIC_ERROR'] = 'Не удалось выполнить действие. Попробуйте ещё раз';
+$MESS['MESSAGESERVICE_MESSAGE_EDITOR_TEMPLATE_MESSAGE'] = 'Сообщение по шаблону';
+$MESS['MSGSVC_CT_SELECTOR_BUTTON'] = 'Шаблоны';
+$MESS['MSGSVC_CT_SELECTOR_CREATE_BUTTON'] = 'Новый шаблон';
+$MESS['MSGSVC_CT_SELECTOR_SETTINGS_BUTTON'] = 'Все шаблоны';
+$MESS['MSGSVC_CT_SELECTOR_EMPTY_TITLE'] = 'Шаблонов пока нет';
+$MESS['MSGSVC_CT_SELECTOR_PLACEHOLDERS_REMOVED'] = 'Некоторые поля недоступны для этого получателя и удалены из текста сообщения';
+$MESS['MSGSVC_SAVE_FLOW_UPDATE_TITLE'] = 'Обновить шаблон «#TITLE#»?';
+$MESS['MSGSVC_SAVE_FLOW_UPDATE_ACTION'] = 'Да, обновить';
+$MESS['MSGSVC_SAVE_FLOW_SAVE_TITLE'] = 'Сохранить шаблон «#TITLE#»?';
+$MESS['MSGSVC_SAVE_FLOW_SAVE_ACTION'] = 'Да, сохранить';
+$MESS['MSGSVC_SAVE_FLOW_OPT_OUT_ACTION'] = 'Больше не спрашивать';
+$MESS['MSGSVC_SAVE_FLOW_SAVED_SUFFIX'] = 'Сохранён как «#TITLE#» — такое название уже используется для другого шаблона';
+$MESS['MSGSVC_SAVE_FLOW_ERROR'] = 'Не удалось сохранить шаблон. Возможно, он уже удалён';

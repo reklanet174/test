@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: Notes API (Bitrix BUS module local.notes)
+  description: |
+    REST API модуля `local.notes` для 1С-Битрикс: Управление сайтом.
+    Контракт совместим с plain-php реализацией.
+  version: 1.0.0
+servers:
+  - url: http://localhost
+    description: Bitrix BUS (bitrix-notes)
+  - url: http://localhost:8081
+    description: React UI proxy
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+  /api/notes:
+    get:
+      summary: Список всех заметок
+      operationId: listNotes
+      responses:
+        '200':
+          description: Список заметок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
+    post:
+      summary: Создать заметку
+      operationId: createNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+      responses:
+        '201':
+          description: Создано
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Note'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/notes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/NoteId'
+    get:
+      summary: Получить заметку
+      operationId: getNote
+      responses:
+        '200':
+          description: Заметка
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Note'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    put:
+      summary: Обновить заметку
+      operationId: updateNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+      responses:
+        '200':
+          description: Обновлено
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      summary: Удалить заметку
+      operationId: deleteNote
+      responses:
+        '200':
+          description: Удалено
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    NoteId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  schemas:
+    NoteInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+    Note:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+  responses:
+    NotFound:
+      description: Не найдено
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: string

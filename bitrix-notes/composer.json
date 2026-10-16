@@ -1,0 +1,23 @@
+{
+    "name": "notes/bitrix-module-tests",
+    "description": "PHPUnit for local.notes module",
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Local\\Notes\\": "module/local.notes/lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

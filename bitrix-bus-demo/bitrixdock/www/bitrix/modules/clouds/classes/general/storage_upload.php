@@ -1,0 +1,629 @@
+<?php
+/*.
+	require_module 'standard';
+	require_module 'pcre';
+	require_module 'hash';
+	require_module 'bitrix_main';
+	require_module 'bitrix_clouds_classes_storage_service';
+	require_module 'bitrix_clouds_classes_storage_bucket';
+.*/
+IncludeModuleLangFile(__FILE__);
+
+class CCloudStorageUpload
+{
+	// Negative GET_LOCK timeouts are rejected since MariaDB 11.4, so wait "forever" is a large positive value.
+	private const PROGRESS_LOCK_TIMEOUT = 1000000;
+
+	protected /*.string.*/ $_filePath = '';
+	protected /*.string.*/ $_ID = '';
+	protected /*.CCloudStorageBucket.*/ $obBucket;
+	protected /*.int.*/ $_max_retries = 3;
+	protected /*.array[string]string.*/ $_cache = null;
+
+	/**
+	 * @param string $filePath
+	 * @return void
+	*/
+	public function __construct($filePath)
+	{
+		$this->_filePath = $filePath;
+		$this->_ID = '1' . mb_substr(md5($filePath), 1);
+	}
+
+	/**
+	 * @return array[string]string
+	*/
+	public function GetArray()
+	{
+		global $DB;
+
+		if (!isset($this->_cache))
+		{
+			$rs = $DB->Query("
+				SELECT *
+				FROM b_clouds_file_upload
+				WHERE ID = '" . $this->_ID . "'
+			");
+			$this->_cache = $rs->Fetch();
+		}
+
+		return $this->_cache;
+	}
+
+	/**
+	 * @return bool
+	*/
+	public function isStarted()
+	{
+		return is_array($this->GetArray());
+	}
+
+	/**
+	 * @return void
+	*/
+	public function Delete()
+	{
+		global $DB;
+		//TODO: clean up temp files in Clodo
+		$DB->Query("DELETE FROM b_clouds_file_upload WHERE ID = '" . $this->_ID . "'");
+		unset($this->_cache);
+	}
+
+	/**
+	 * @return void
+	*/
+	public function DeleteOld()
+	{
+		global $DB;
+		$DB->Query('DELETE FROM b_clouds_file_upload WHERE TIMESTAMP_X < ' . $DB->CharToDateFunction(ConvertTimeStamp(time() - 24 * 60 * 60)));
+	}
+
+	/**
+	 * @param int $bucket_id
+	 * @param float $fileSize
+	 * @param string $ContentType
+	 * @return bool
+	*/
+	public function Start($bucket_id, $fileSize, $ContentType = 'binary/octet-stream', $tmpFileName = false)
+	{
+		global $DB;
+		global $APPLICATION;
+
+		if (is_object($bucket_id))
+		{
+			$obBucket = $bucket_id;
+		}
+		else
+		{
+			$obBucket = new CCloudStorageBucket(intval($bucket_id));
+		}
+
+		if (!$obBucket->Init())
+		{
+			return false;
+		}
+
+		if (!$this->isStarted())
+		{
+			$arUploadInfo = /*.(array[string]string).*/[];
+			$bStarted = $obBucket->getService()->InitiateMultipartUpload(
+				$obBucket->getBucketArray(),
+				$arUploadInfo,
+				$this->_filePath,
+				$fileSize,
+				$ContentType
+			);
+			if (!$bStarted && $obBucket->RenewToken())
+			{
+				$bStarted = $obBucket->getService()->InitiateMultipartUpload(
+					$obBucket->getBucketArray(),
+					$arUploadInfo,
+					$this->_filePath,
+					$fileSize,
+					$ContentType
+				);
+			}
+
+			if ($bStarted)
+			{
+				$bAdded = $DB->Add('b_clouds_file_upload', [
+					'ID' => $this->_ID,
+					'~TIMESTAMP_X' => $DB->CurrentTimeFunction(),
+					'FILE_PATH' => $this->_filePath,
+					'FILE_SIZE' => $fileSize,
+					'TMP_FILE' => $tmpFileName,
+					'BUCKET_ID' => intval($obBucket->ID),
+					'PART_SIZE' => $obBucket->getService()->GetMinUploadPartSize(),
+					'PART_NO' => 0,
+					'PART_FAIL_COUNTER' => 0,
+					'NEXT_STEP' => serialize($arUploadInfo),
+				], ['NEXT_STEP']);
+				unset($this->_cache);
+
+				return $bAdded !== false;
+			}
+			else
+			{
+				$error = $obBucket->getService()->formatError();
+				if ($error)
+				{
+					$APPLICATION->ThrowException($error);
+				}
+				else
+				{
+					$APPLICATION->ThrowException(GetMessage('CLO_STORAGE_UPLOAD_ERROR', ['#errno#' => 6]));
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param string $data
+	 * @return bool
+	*/
+	public function Next($data, $obBucket = null)
+	{
+		global $APPLICATION;
+
+		if ($this->isStarted())
+		{
+			$ar = $this->GetArray();
+
+			if ($obBucket === null)
+			{
+				$obBucket = new CCloudStorageBucket(intval($ar['BUCKET_ID']));
+			}
+
+			if (!$obBucket->Init())
+			{
+				$APPLICATION->ThrowException(GetMessage('CLO_STORAGE_UPLOAD_ERROR', ['#errno#' => 1]));
+				return false;
+			}
+
+			$arUploadInfo = unserialize($ar['NEXT_STEP'], ['allowed_classes' => false]);
+			$bSuccess = $obBucket->getService()->UploadPart(
+				$obBucket->getBucketArray(),
+				$arUploadInfo,
+				$data
+			);
+
+			if (!$bSuccess)
+			{
+				$error = $obBucket->getService()->formatError();
+				if ($error)
+				{
+					$APPLICATION->ThrowException($error);
+				}
+			}
+
+			if (!$this->UpdateProgress($arUploadInfo, $bSuccess))
+			{
+				$APPLICATION->ThrowException(GetMessage('CLO_STORAGE_UPLOAD_ERROR', ['#errno#' => 2]));
+				return false;
+			}
+
+			return $bSuccess;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param string $data
+	 * @param int $part_no
+	 * @return bool
+	*/
+	public function Part($data, $part_no, $obBucket = null)
+	{
+		global $APPLICATION;
+
+		if ($this->isStarted())
+		{
+			$ar = $this->GetArray();
+
+			if ($obBucket === null)
+			{
+				$obBucket = new CCloudStorageBucket(intval($ar['BUCKET_ID']));
+			}
+
+			if (!$obBucket->Init())
+			{
+				$APPLICATION->ThrowException(GetMessage('CLO_STORAGE_UPLOAD_ERROR', ['#errno#' => 3]));
+				return false;
+			}
+
+			$arUploadInfo = unserialize($ar['NEXT_STEP'], ['allowed_classes' => false]);
+			$bSuccess = $obBucket->getService()->UploadPartNo(
+				$obBucket->getBucketArray(),
+				$arUploadInfo,
+				$data,
+				$part_no
+			);
+
+			if (!$bSuccess)
+			{
+				$error = $obBucket->getService()->formatError();
+				if ($error)
+				{
+					$APPLICATION->ThrowException($error);
+				}
+			}
+
+			if (!$this->UpdateProgress($arUploadInfo, $bSuccess))
+			{
+				$APPLICATION->ThrowException(GetMessage('CLO_STORAGE_UPLOAD_ERROR', ['#errno#' => 5]));
+				return false;
+			}
+
+			return $bSuccess;
+		}
+
+		return false;
+	}
+
+	protected function getProgressLockName(): string
+	{
+		return 'CCloudStorageUpload::progress(' . $this->_ID . ')';
+	}
+
+	/**
+	 * Replaces the Parts state of an active multipart session with the supplied
+	 * (partNumber → ETag) map. Used by direct-to-cloud (presigned) uploads — the
+	 * client PUTs each part itself and collects ETags out-of-band, so by the time
+	 * Finish() is called NEXT_STEP.Parts must be repopulated from the application's
+	 * own tracking.
+	 *
+	 * @param array<int, string> $partsMap 1-based partNumber → ETag (as returned by S3).
+	 * @return bool true on success.
+	 */
+	public function setParts(array $partsMap): bool
+	{
+		global $DB;
+
+		if (!$this->isStarted())
+		{
+			return false;
+		}
+
+		$lockId = $this->getProgressLockName();
+		$connection = \Bitrix\Main\Application::getConnection();
+		if (!$connection->lock($lockId, self::PROGRESS_LOCK_TIMEOUT))
+		{
+			return false;
+		}
+
+		try
+		{
+			// Re-read NEXT_STEP under the lock and merge so concurrent mutations
+			// outside of Parts (PART_NO, fail counters, etc.) are preserved.
+			$dbUploadInfo = $connection->queryScalar(
+				"SELECT NEXT_STEP FROM b_clouds_file_upload WHERE ID = '" . $this->_ID . "'"
+			);
+
+			$arUploadInfo = $dbUploadInfo ? unserialize($dbUploadInfo, ['allowed_classes' => false]) : null;
+			if (!is_array($arUploadInfo))
+			{
+				return false;
+			}
+
+			// CompleteMultipartUpload computes PartNumber = key + 1, so we store with
+			// 0-based keys to stay binary-compatible with the rest of the flow.
+			$arUploadInfo['Parts'] = [];
+			foreach ($partsMap as $partNumber => $etag)
+			{
+				$arUploadInfo['Parts'][(int)$partNumber - 1] = (string)$etag;
+			}
+
+			$next = serialize($arUploadInfo);
+			$strUpdate = $DB->PrepareUpdate('b_clouds_file_upload', ['NEXT_STEP' => $next]);
+			if ($strUpdate === '')
+			{
+				return false;
+			}
+
+			try
+			{
+				$connection->query("UPDATE b_clouds_file_upload SET {$strUpdate} WHERE ID = '" . $this->_ID . "'");
+			}
+			catch (\Bitrix\Main\DB\SqlQueryException $_)
+			{
+				return false;
+			}
+
+			return true;
+		}
+		finally
+		{
+			$connection->unlock($lockId);
+			unset($this->_cache);
+		}
+	}
+
+	/**
+	 * Returns a presigned URL that lets the client PUT a single part directly to S3,
+	 * bypassing PHP. Requires an active multipart session (Start() called).
+	 * 1-based partNumber matches S3 PartNumber semantics.
+	 *
+	 * @param int $partNumber 1-based.
+	 * @param int $expires Time-to-live in seconds.
+	 * @param CCloudStorageBucket|null $obBucket Optional bucket (loaded from BUCKET_ID if null).
+	 * @param int|null $contentLength Optional expected part size; when set it is signed into
+	 *        the URL so S3 rejects a part PUT whose body size differs.
+	 * @return string|null Null if the session is not active or the service has no presigned support.
+	 */
+	public function presignPart(int $partNumber, int $expires, $obBucket = null, ?int $contentLength = null): ?string
+	{
+		if (!$this->isStarted())
+		{
+			return null;
+		}
+
+		$ar = $this->GetArray();
+
+		if ($obBucket === null)
+		{
+			$obBucket = new CCloudStorageBucket((int)$ar['BUCKET_ID']);
+		}
+
+		if (!$obBucket->Init() || !$obBucket->supportsPresignedUrls())
+		{
+			return null;
+		}
+
+		$arUploadInfo = unserialize($ar['NEXT_STEP'], ['allowed_classes' => false]);
+		if (!is_array($arUploadInfo))
+		{
+			return null;
+		}
+
+		return $obBucket->getPresignedMultiPartUrl($arUploadInfo, $partNumber, $expires, $contentLength);
+	}
+
+	/**
+	 * @return bool
+	*/
+	public function Finish($obBucket = null)
+	{
+		global $APPLICATION;
+
+		if ($this->isStarted())
+		{
+			$ar = $this->GetArray();
+
+			if ($obBucket === null)
+			{
+				$obBucket = new CCloudStorageBucket(intval($ar['BUCKET_ID']));
+			}
+			if (!$obBucket->Init())
+			{
+				return false;
+			}
+
+			$arUploadInfo = unserialize($ar['NEXT_STEP'], ['allowed_classes' => false]);
+			$bSuccess = $obBucket->getService()->CompleteMultipartUpload(
+				$obBucket->getBucketArray(),
+				$arUploadInfo
+			);
+
+			if ($bSuccess)
+			{
+				$this->Delete();
+
+				if ($obBucket->getQueueFlag())
+				{
+					CCloudFailover::queueCopy($obBucket, $this->_filePath);
+				}
+
+				foreach (GetModuleEvents('clouds', 'OnAfterCompleteMultipartUpload', true) as $arEvent)
+				{
+					ExecuteModuleEventEx($arEvent, [$obBucket, ['size' => $ar['FILE_SIZE']], $this->_filePath]);
+				}
+			}
+			else
+			{
+				$error = $obBucket->getService()->formatError();
+				if ($error)
+				{
+					$APPLICATION->ThrowException($error);
+				}
+			}
+
+			return $bSuccess;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return int
+	*/
+	public function GetPartCount()
+	{
+		$ar = $this->GetArray();
+
+		if (is_array($ar))
+		{
+			return intval($ar['PART_NO']);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	/**
+	 * @return float
+	*/
+	public function GetPos()
+	{
+		$ar = $this->GetArray();
+
+		if (is_array($ar))
+		{
+			return intval($ar['PART_NO']) * doubleval($ar['PART_SIZE']);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	/**
+	 * @return int
+	*/
+	public function getPartSize()
+	{
+		$ar = $this->GetArray();
+
+		if (is_array($ar))
+		{
+			return intval($ar['PART_SIZE']);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	/**
+	 * @return bool
+	*/
+	public function hasRetries()
+	{
+		$ar = $this->GetArray();
+		return is_array($ar) && (intval($ar['PART_FAIL_COUNTER']) < $this->_max_retries);
+	}
+
+	/**
+	 * @return string
+	*/
+	public function getTempFileName()
+	{
+		$ar = $this->GetArray();
+		if (is_array($ar))
+		{
+			return $ar['TMP_FILE'];
+		}
+		else
+		{
+			return '';
+		}
+	}
+
+	/**
+	 * @param array $arUploadInfo
+	 * @param bool $bSuccess
+	 * @return bool
+	*/
+	protected function UpdateProgress($arUploadInfo, $bSuccess)
+	{
+		global $DB;
+		$connection = \Bitrix\Main\Application::getConnection();
+		$lockId = '';
+		$locked = false;
+
+		if ($bSuccess)
+		{
+			$lockId = $this->getProgressLockName();
+			if (!$connection->lock($lockId, self::PROGRESS_LOCK_TIMEOUT))
+			{
+				unset($this->_cache);
+
+				return false;
+			}
+			$locked = true;
+		}
+
+		try
+		{
+			if ($bSuccess)
+			{
+				$dbUploadInfo = $connection->queryScalar("SELECT NEXT_STEP FROM b_clouds_file_upload WHERE ID = '" . $this->_ID . "'");
+				if ($dbUploadInfo)
+				{
+					$arUploadInfo = array_replace_recursive(unserialize($dbUploadInfo, ['allowed_classes' => false]), $arUploadInfo);
+				}
+
+				$arFields = [
+					'NEXT_STEP' => serialize($arUploadInfo),
+					'~PART_NO' => 'PART_NO + 1',
+					'PART_FAIL_COUNTER' => 0,
+				];
+			}
+			else
+			{
+				$arFields = [
+					'~PART_FAIL_COUNTER' => 'PART_FAIL_COUNTER + 1',
+				];
+			}
+
+			$strUpdate = $DB->PrepareUpdate('b_clouds_file_upload', $arFields);
+			if ($strUpdate !== '')
+			{
+				try
+				{
+					$connection->query('UPDATE b_clouds_file_upload SET ' . $strUpdate . " WHERE ID = '" . $this->_ID . "'");
+				}
+				catch (\Bitrix\Main\DB\SqlQueryException $_)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		finally
+		{
+			if ($locked)
+			{
+				$connection->unlock($lockId);
+			}
+			unset($this->_cache);
+		}
+	}
+
+	public static function CleanUp($ID = '')
+	{
+		$connection = \Bitrix\Main\Application::getConnection();
+		$helper = $connection->getSqlHelper();
+		$rs = false;
+
+		if ($ID)
+		{
+			$rs = $connection->query("
+				SELECT ID, BUCKET_ID, NEXT_STEP
+				FROM b_clouds_file_upload
+				WHERE ID = '" . $helper->forSql($ID) . "'
+			");
+		}
+		else
+		{
+			$days = COption::GetOptionInt('clouds', 'multipart_upload_keep_days');
+			if ($days > 0)
+			{
+				$rs = $connection->query('
+					SELECT ID, BUCKET_ID, NEXT_STEP
+					FROM b_clouds_file_upload
+					WHERE TIMESTAMP_X < ' . $helper->addDaysToDateTime(-$days)
+				);
+			}
+		}
+
+		if ($rs)
+		{
+			while ($arBucket = $rs->fetch())
+			{
+				$obBucket = new CCloudStorageBucket(intval($arBucket['BUCKET_ID']));
+				if ($obBucket->Init())
+				{
+					$arUploadInfo = unserialize($arBucket['NEXT_STEP'], ['allowed_classes' => false]);
+					$service = $obBucket->getService();
+					$service->CancelMultipartUpload($obBucket->getBucketArray(), $arUploadInfo);
+				}
+				$connection->query("DELETE FROM b_clouds_file_upload WHERE ID = '" . $helper->forSql($arBucket['ID']) . "'");
+			}
+		}
+	}
+}

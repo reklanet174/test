@@ -1,0 +1,104 @@
+.ui-block-diagram-canvas-zoom-bar {
+    display: flex;
+	align-items: center;
+    gap: 4px;
+	position: relative;
+    padding: 2px 8px;
+	border-radius: 8px;
+	background: var(--ui-color-palette-white-base, rgba(255, 255, 255, 1));
+	box-shadow: 0 1px 2px 0 rgba(var(--ui-color-palette-black-solid-rgb), 0.13);
+	box-sizing: border-box;
+    outline: none;
+}
+
+.ui-block-diagram-canvas-zoom-bar.--flat {
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.ui-block-diagram-canvas-zoom-bar__zoom {
+    display: flex;
+	align-items: center;
+    gap: 2px;
+    padding-left: 4px;
+    font: var(--ui-font-weight-medium) 12px/14px var(--ui-font-family-system);
+	color: var(--ui-color-palette-gray-70);
+	position: relative;
+}
+
+
+.ui-block-diagram-canvas-zoom-bar__locate {
+	height: 32px;
+	font: var(--ui-font-weight-medium) 12px/14px var(--ui-font-family-system);
+	color: var(--ui-color-palette-gray-80);
+    cursor: pointer;
+}
+
+.ui-block-diagram-canvas-zoom-bar__locate:hover {
+	color: var(--ui-color-palette-gray-90);
+}
+
+.ui-block-diagram-canvas-zoom-bar__locate.--selected {
+	color: var(--ui-color-palette-blue-60);
+}
+
+.ui-block-diagram-canvas-zoom-bar__separator {
+	width: 1px;
+	height: 28px;
+	background: var(--ui-color-palette-gray-10);
+}
+
+.ui-block-diagram-canvas-zoom-bar__map {
+	position: absolute;
+	bottom: 40px;
+	z-index: 100;
+	padding: 5px 10px 10px 10px;
+	border-radius: 8px;
+	background-color: white;
+	box-shadow: 0 1px 2px 0 rgba(var(--ui-color-palette-black-solid-rgb), 0.13);
+}
+
+.ui-block-diagram-canvas-zoom-bar__map.--right {
+	right: 0;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map.--left {
+	left: 0;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map.--top {
+	bottom: 40px;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map.--bottom {
+	top: 40px;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map-header {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map-close-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: none;
+	margin: 0;
+	background-color: transparent;
+	cursor: pointer;
+}
+
+.ui-block-diagram-canvas-zoom-bar__map-close-button:focus-visible {
+	outline: var(--ui-focus-outline-width) solid var(--ui-color-focus-outline);
+	outline-offset: var(--ui-focus-outline-offset);
+	border-radius: var(--ui-border-radius-2xs);
+}
+
+.ui-block-diagram-canvas-zoom-bar__map-close-icon {
+	font-size: 20px;
+}

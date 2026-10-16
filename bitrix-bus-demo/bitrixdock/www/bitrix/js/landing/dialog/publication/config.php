@@ -1,0 +1,15 @@
+<?
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
+{
+	die();
+}
+
+return [
+	'css' => 'dist/publication.bundle.css',
+	'js' => 'dist/publication.bundle.js',
+	'rel' => [
+		'main.core',
+		'ui.dialogs.messagebox',
+	],
+	'skip_core' => false,
+];

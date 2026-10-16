@@ -1,0 +1,417 @@
+<?php
+
+namespace Bitrix\UI\Controller;
+
+use Bitrix\Main\Engine\Action;
+use Bitrix\Main\Engine\ActionFilter;
+use Bitrix\Main\Engine\AutoWire\ExactParameter;
+use Bitrix\Main\Engine\AutoWire\Parameter;
+use Bitrix\Main\Engine\Controller;
+use Bitrix\Main\Engine\Response;
+use Bitrix\Main\Error;
+use Bitrix\Main\Web\Json;
+use Bitrix\UI\FileUploader\Chunk;
+use Bitrix\UI\FileUploader\Configuration;
+use Bitrix\UI\FileUploader\ChunkFactory;
+use Bitrix\UI\FileUploader\ControllerResolver;
+use Bitrix\UI\FileUploader\FileData;
+use Bitrix\UI\FileUploader\Uploader;
+use Bitrix\UI\FileUploader\UploaderController;
+use Bitrix\UI\FileUploader\UploaderError;
+
+class FileUploader extends Controller
+{
+	public function configureActions()
+	{
+		$configureActions = [];
+
+		$configureActions['preview'] = [
+			'-prefilters' => [
+				ActionFilter\Csrf::class,
+				ActionFilter\HttpMethod::class,
+			],
+			'+prefilters' => [
+				new ActionFilter\HttpMethod([ActionFilter\HttpMethod::METHOD_GET]),
+				// new ActionFilter\CheckImageSignature(),
+			]
+		];
+
+		$configureActions['download'] = [
+			'-prefilters' => [
+				ActionFilter\Csrf::class,
+				ActionFilter\HttpMethod::class,
+			],
+			'+prefilters' => [
+				new ActionFilter\HttpMethod([ActionFilter\HttpMethod::METHOD_GET]),
+			]
+		];
+
+		return $configureActions;
+	}
+
+	protected function getDefaultPreFilters(): array
+	{
+		return [
+			new ActionFilter\HttpMethod([ActionFilter\HttpMethod::METHOD_POST]),
+			new ActionFilter\Csrf(),
+			new ActionFilter\CloseSession(),
+		];
+	}
+
+	/**
+	 * Returns the whitelist of UploadControllers.
+	 * You have to override this method for custom ajax controllers.
+	 * @return array|null
+	 */
+	protected function getAvailableControllers(): ?array
+	{
+		return null;
+	}
+
+	public function getAutoWiredParameters(): array
+	{
+		$request = $this->getRequest();
+
+		return [
+			new ExactParameter(
+				UploaderController::class,
+				'controller',
+				function ($className, string $controller, string $controllerOptions = null) {
+					try
+					{
+						$options = empty($controllerOptions) ? [] : Json::decode($controllerOptions);
+						$options = is_array($options) ? $options : [];
+					}
+					catch (\Exception $e)
+					{
+						$options = [];
+					}
+
+					if (is_subclass_of($this, FileUploader::class))
+					{
+						$availableControllers = $this->getAvailableControllers();
+						if ($availableControllers === null)
+						{
+							$this->addError(new Error(
+								'You have to override "getAvailableControllers" method for your custom ajax controller.'
+							));
+
+							return null;
+						}
+
+						[$moduleId, $className] = ControllerResolver::resolveName($controller);
+						$className = strtolower(ltrim($className, '\\'));
+
+						$availableNames = array_map(function($name) {
+							return strtolower(ltrim($name, '\\'));
+						}, $availableControllers);
+
+						if (
+							!in_array(strtolower($controller), $availableNames)
+							&& !in_array($className, $availableNames)
+						)
+						{
+							$this->addError(new Error('Invalid Controller Name.'));
+
+							return null;
+						}
+					}
+
+					return ControllerResolver::createController($controller, $options);
+				}
+			),
+			new Parameter(
+				Chunk::class,
+				function ($className) use ($request) {
+					$result = ChunkFactory::createFromRequest($request);
+					if ($result->isSuccess())
+					{
+						return $result->getData()['chunk'];
+					}
+					else
+					{
+						$this->addErrors($result->getErrors());
+
+						return null;
+					}
+				}
+			),
+			new Parameter(
+				FileData::class,
+				function ($className) use ($request) {
+					$name = trim((string)$request->get('name'));
+					$type = (string)$request->get('type');
+					$size = (int)$request->get('size');
+
+					if ($name === '' || $size <= 0)
+					{
+						$this->addError(new UploaderError(UploaderError::INVALID_CONTENT_NAME));
+
+						return null;
+					}
+
+					$fileData = new FileData($name, $type, $size);
+
+					$width = (int)$request->get('width');
+					if ($width > 0)
+					{
+						$fileData->setWidth($width);
+					}
+					$height = (int)$request->get('height');
+					if ($height > 0)
+					{
+						$fileData->setHeight($height);
+					}
+
+					return $fileData;
+				}
+			),
+		];
+	}
+
+	public function processBeforeAction(Action $action): bool
+	{
+		$contentLength = (int)$this->getRequest()->getServer()->get('CONTENT_LENGTH');
+		$maxFileSize = min(
+			\CUtil::unformat(ini_get('upload_max_filesize')),
+			\CUtil::unformat(ini_get('post_max_size'))
+		);
+
+		if ($contentLength > $maxFileSize)
+		{
+			$this->addError(new UploaderError(UploaderError::TOO_BIG_REQUEST));
+
+			return false;
+		}
+
+		return parent::processBeforeAction($action);
+	}
+
+	public function uploadAction(UploaderController $controller, Chunk $chunk, ?string $token = null, ?string $strategy = null): array
+	{
+		$uploader = new Uploader($controller);
+		$uploadResult = $uploader->upload($chunk, $token, $strategy);
+		if ($uploadResult->isSuccess())
+		{
+			return $uploadResult->jsonSerialize();
+		}
+		else
+		{
+			$this->addErrors($uploadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function uploadPartAction(UploaderController $controller, Chunk $chunk, string $token, int $partNo): array
+	{
+		$uploader = new Uploader($controller);
+		$uploadResult = $uploader->uploadPart($chunk, $token, $partNo);
+		if ($uploadResult->isSuccess())
+		{
+			return $uploadResult->jsonSerialize();
+		}
+		else
+		{
+			$this->addErrors($uploadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function initPresignedAction(UploaderController $controller, FileData $fileData, ?int $partSize = null): array
+	{
+		$uploader = new Uploader($controller);
+		$uploadResult = $uploader->initPresigned($fileData, $partSize);
+		if ($uploadResult->isSuccess())
+		{
+			return $uploadResult->jsonSerialize();
+		}
+		else
+		{
+			$this->addErrors($uploadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function refreshPresignedAction(UploaderController $controller, string $token, array $partNumbers): array
+	{
+		$uploader = new Uploader($controller);
+		$result = $uploader->refreshPresignedUrls($token, $partNumbers);
+		if ($result->isSuccess())
+		{
+			return $result->getData();
+		}
+		else
+		{
+			$this->addErrors($result->getErrors());
+		}
+
+		return [];
+	}
+
+	public function registerPartAction(UploaderController $controller, string $token, int $partNo, string $etag): array
+	{
+		$uploader = new Uploader($controller);
+		$result = $uploader->registerPresignedPart($token, $partNo, $etag);
+		if ($result->isSuccess())
+		{
+			return $result->getData();
+		}
+		else
+		{
+			$this->addErrors($result->getErrors());
+		}
+
+		return [];
+	}
+
+	public function registerPartsAction(UploaderController $controller, string $token, array $parts): array
+	{
+		$uploader = new Uploader($controller);
+		$result = $uploader->registerPresignedParts($token, $parts);
+		if ($result->isSuccess())
+		{
+			return $result->getData();
+		}
+		else
+		{
+			$this->addErrors($result->getErrors());
+		}
+
+		return [];
+	}
+
+	public function completePresignedAction(UploaderController $controller, string $token, array $parts = []): array
+	{
+		$uploader = new Uploader($controller);
+		$uploadResult = $uploader->completePresigned($token, $parts);
+		if ($uploadResult->isSuccess())
+		{
+			return $uploadResult->jsonSerialize();
+		}
+		else
+		{
+			$this->addErrors($uploadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function loadAction(UploaderController $controller, array $fileIds): array
+	{
+		$uploader = new Uploader($controller);
+		$loadResults = $uploader->load($fileIds);
+
+		return [
+			'files' => $loadResults,
+		];
+	}
+
+	public function downloadAction(UploaderController $controller, string $fileId)
+	{
+		$uploader = new Uploader($controller);
+		$loadResults = $uploader->load([$fileId]);
+		$loadResult = $loadResults->getAll()[0] ?? null;
+
+		if ($loadResult === null)
+		{
+			$this->addError(new UploaderError(UploaderError::FILE_LOAD_FAILED));
+		}
+		else if ($loadResult->isSuccess())
+		{
+			$fileId = $loadResult->getFile() ? $loadResult->getFile()->getFileId() : 0;
+			if ($fileId > 0)
+			{
+				return Response\BFile::createByFileId($fileId);
+			}
+			else
+			{
+				$this->addError(new UploaderError(UploaderError::FILE_FIND_FAILED));
+			}
+		}
+		else
+		{
+			$this->addErrors($loadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function previewAction(UploaderController $controller, string $fileId)
+	{
+		$uploader = new Uploader($controller);
+		$loadResults = $uploader->load([$fileId]);
+		$loadResult = $loadResults->getAll()[0] ?? null;
+
+		if ($loadResult === null)
+		{
+			$this->addError(new UploaderError(UploaderError::FILE_LOAD_FAILED));
+		}
+		else if ($loadResult->isSuccess())
+		{
+			$imageId = $loadResult->getFile() ? $loadResult->getFile()->getFileId() : 0;
+			$imageData = \CFile::getFileArray($imageId);
+
+			if (is_array($imageData))
+			{
+				// Sync with \Bitrix\UI\FileUploader\Uploader::getFileInfo
+				$response = new Response\ResizedImage($imageData, 300, 300);
+				$response->setResizeType(BX_RESIZE_IMAGE_PROPORTIONAL);
+				$response->setCacheTime(86400);
+
+				return $response;
+			}
+			else
+			{
+				$this->addError(new UploaderError(UploaderError::FILE_FIND_FAILED));
+			}
+		}
+		else
+		{
+			$this->addErrors($loadResult->getErrors());
+		}
+
+		return [];
+	}
+
+	public function removeAction(UploaderController $controller, array $fileIds): array
+	{
+		$uploader = new Uploader($controller);
+		$removeResult = $uploader->remove($fileIds);
+
+		return [
+			'files' => $removeResult,
+		];
+	}
+
+	public function getConfigurationAction(UploaderController $controller): array
+	{
+		return [
+			'configuration' => $controller->getConfiguration(),
+			'chunkMinSize' => Configuration::getChunkMinSize(),
+			'chunkMaxSize' => Configuration::getChunkMaxSize(),
+			'defaultChunkSize' => Configuration::getDefaultChunkSize(),
+			'imageExtensions' => Configuration::getImageExtensions(withDot: false),
+			'videoExtensions' => Configuration::getVideoExtensions(withDot: false),
+		];
+	}
+
+	public function getStatusAction(UploaderController $controller, string $token): array
+	{
+		$uploader = new Uploader($controller);
+		$statusResult = $uploader->getStatus($token);
+
+		if ($statusResult->isSuccess())
+		{
+			return $statusResult->jsonSerialize();
+		}
+		else
+		{
+			$this->addErrors($statusResult->getErrors());
+		}
+
+		return [];
+	}
+}

@@ -1,0 +1,112 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Bitrix\Rest\Internal\Repository\IncomingWebhook;
+
+use Bitrix\Rest\Enum\APAuth\PasswordType;
+
+final class WebhookFilter
+{
+	private ?int $userId = null;
+	/** @var string[]|null */
+	private ?array $scopes = null;
+	/** @var array<string, string|null>|null */
+	private ?array $attributes = null;
+	/** @var array<string, string|null>|null */
+	private ?array $excludedAttributes = null;
+	private ?PasswordType $type = null;
+	private ?bool $active = null;
+
+	public function userId(?int $userId): self
+	{
+		$this->userId = $userId;
+
+		return $this;
+	}
+
+	public function type(?PasswordType $type): self
+	{
+		$this->type = $type;
+
+		return $this;
+	}
+
+	public function active(?bool $active): self
+	{
+		$this->active = $active;
+
+		return $this;
+	}
+
+	/**
+	 * @param string[]|null $scopes keep webhooks granting at least one of these scopes
+	 */
+	public function scopes(?array $scopes): self
+	{
+		$this->scopes = $scopes;
+
+		return $this;
+	}
+
+	/**
+	 * @param array<string, string|null>|null $attributes keep webhooks carrying every one of these external
+	 *        attributes; map of code => required value (a null value matches any value)
+	 */
+	public function externalAttributes(?array $attributes): self
+	{
+		$this->attributes = ($attributes === null || $attributes === []) ? null : $attributes;
+
+		return $this;
+	}
+
+	/**
+	 * @param array<string, string|null>|null $attributes exclude webhooks carrying every one of these external
+	 *        attributes; map of code => required value (a null value matches any value)
+	 */
+	public function withoutExternalAttributes(?array $attributes): self
+	{
+		$this->excludedAttributes = ($attributes === null || $attributes === []) ? null : $attributes;
+
+		return $this;
+	}
+
+	public function getUserId(): ?int
+	{
+		return $this->userId;
+	}
+
+	public function getType(): ?PasswordType
+	{
+		return $this->type;
+	}
+
+	public function getActive(): ?bool
+	{
+		return $this->active;
+	}
+
+	/**
+	 * @return string[]|null
+	 */
+	public function getScopes(): ?array
+	{
+		return $this->scopes;
+	}
+
+	/**
+	 * @return array<string, string|null>|null
+	 */
+	public function getExternalAttributes(): ?array
+	{
+		return $this->attributes;
+	}
+
+	/**
+	 * @return array<string, string|null>|null
+	 */
+	public function getExcludedExternalAttributes(): ?array
+	{
+		return $this->excludedAttributes;
+	}
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notes API docs</title>
+  <link rel="stylesheet" href="/swagger-ui/swagger-ui.css" />
+  <style>
+    body { margin: 0; }
+    .top {
+      padding: 12px 20px;
+      font-family: Segoe UI, Arial, sans-serif;
+      border-bottom: 1px solid #ddd;
+      background: #f7f7f7;
+    }
+    .top a { margin-right: 12px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a href="/">К заметкам</a>
+    <a href="/openapi.yaml">openapi.yaml</a>
+  </div>
+  <div id="swagger-ui"></div>
+  <script src="/swagger-ui/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = function () {
+      if (typeof SwaggerUIBundle === 'undefined') {
+        document.getElementById('swagger-ui').innerHTML =
+          '<div style="padding:20px;font-family:sans-serif">' +
+          '<h2>Swagger UI не загрузился</h2>' +
+          '<p>Открой спецификацию: <a href="/openapi.yaml">/openapi.yaml</a></p>' +
+          '<h3>Методы API</h3>' +
+          '<ul>' +
+          '<li>GET /api/notes - список</li>' +
+          '<li>GET /api/notes/{id} - одна заметка</li>' +
+          '<li>POST /api/notes - создать</li>' +
+          '<li>PUT /api/notes/{id} - обновить</li>' +
+          '<li>DELETE /api/notes/{id} - удалить</li>' +
+          '</ul></div>';
+        return;
+      }
+
+      SwaggerUIBundle({
+        url: '/openapi.yaml',
+        dom_id: '#swagger-ui',
+      });
+    };
+  </script>
+</body>
+</html>

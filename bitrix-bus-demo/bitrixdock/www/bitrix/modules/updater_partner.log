@@ -1,0 +1,60 @@
+2026-10-16 19:47:07 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:47:07 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:47:08 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 19:47:08 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 19:47:08 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:47:08 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 19:47:08 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:47:09 -  - TIME GetUpdatesList(request) 0.563 sec
+2026-10-16 19:47:09 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 19:47:09 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:47:09 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:47:09 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 19:48:45 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 19:48:45 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:48:46 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 19:48:46 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:48:46 -  - TIME GetUpdatesList(request) 0.734 sec
+2026-10-16 19:48:46 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 19:48:56 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 19:48:56 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:48:56 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 19:48:56 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:48:57 -  - TIME GetUpdatesList(request) 1.079 sec
+2026-10-16 19:48:57 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 19:49:08 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 19:49:08 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 19:49:08 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 19:49:08 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 19:49:09 -  - TIME GetUpdatesList(request) 1.055 sec
+2026-10-16 19:49:09 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 20:06:49 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 20:06:49 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 20:06:49 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 20:06:49 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 20:06:50 -  - TIME GetUpdatesList(request) 0.941 sec
+2026-10-16 20:06:50 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 20:06:56 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 20:06:56 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 20:06:56 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 20:06:56 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 20:06:57 -  - TIME GetUpdatesList(request) 0.839 sec
+2026-10-16 20:06:57 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 20:07:03 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 20:07:03 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 20:07:03 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 20:07:03 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 20:07:04 -  - TIME GetUpdatesList(request) 0.828 sec
+2026-10-16 20:07:04 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 20:07:09 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 20:07:09 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 20:07:09 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 20:07:09 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 20:07:10 -  - TIME GetUpdatesList(request) 0.773 sec
+2026-10-16 20:07:10 -  - exec CUpdateClientPartner::ParseServerData
+2026-10-16 20:07:16 -  - exec CUpdateClientPartner::GetUpdatesList
+2026-10-16 20:07:16 -  - exec CUpdateClientPartner::__CollectRequestData
+2026-10-16 20:07:16 -  - utf=Y&lang=ru&stable=Y&CANGZIP=Y&SUPD_DBS=MYSQL&XE=N&CLIENT_SITE=localhost&LICENSE_KEY=X&SUPD_STS=1&SUPD_URS=0&TYPENC=D&CLIENT_PHPVER=8.3.35&NGINX=Y&dbv=8.4.11&instm=main%2C26.800.0%2CY%3Bb24connector%2C26.0.0%2CN%3Bbitrix.sitecorporate%2C26.0.0%2CN%3Bbitrixcloud%2C26.0.0%2CN%3Bclouds%2C26.150.0%2CN%3Bfileman%2C26.0.0%2CN%3Bhighloadblock%2C25.100.0%2CN%3Biblock%2C26.0.100%2CN%3Blanding%2C26.1300.50%2CN%3Blocation%2C26.400.0%2CN%3Bmessageservice%2C26.200.0%2CN%3Bperfmon%2C25.300.0%2CN%3Brest%2C26.800.0%2CN%3Bsearch%2C26.100.0%2CN%3Bsecurity%2C26.200.0%2CN%3Bseo%2C26.100.0%2CN%3Bsocialservices%2C26.400.0%2CN%3Btranslate%2C26.100.0%2CN%3Bui%2C26.687.0%2CN&reqm=bitrix.sitecorporate&fullmoduleinfo=Y&SUPD_SRS=RU&SUPD_CMP=N
+2026-10-16 20:07:16 -  - exec CUpdateClientPartner::GetHTTPPage
+2026-10-16 20:07:17 -  - TIME GetUpdatesList(request) 0.83 sec
+2026-10-16 20:07:17 -  - exec CUpdateClientPartner::ParseServerData
